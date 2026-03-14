@@ -3,10 +3,10 @@
 # ACE Pro - A Klipper driver for the Anycubic Color Engine Pro
 
 </div>
-
+<!-- 
 <p align="center">
   <img src="img/ACEPro.png" alt="Overview" width="30%">
-</p>
+</p> -->
 
 Based on the great work of utkabobr ([DuckACE](https://github.com/utkabobr/DuckACE)) and szkrisz ([ACEPROSV08](https://github.com/szkrisz/ACEPROSV08)).
 This is a fork of szkrisz' ACEPRO Klipper driver.
@@ -25,13 +25,6 @@ This Anycubic-centric fork has structurally diverged from the original and focus
 - Expanding controls/panels in the ACE KlipperScreen panel
 - Standalone browser dashboard (ValgACE-inspired) served by Moonraker at `/ace.html`
 
-The provided configurations are tailored for use with Kobra-S1 and Kobra-3 printers (I have only those, so it's also only tested with those printers).
-
-For Kobra-3 MAX there is a BETA test configuration available, but its not fully tested yet.
-
-In general other (non-)Anycubic printers are possible to use, but adaptations of the feed/retract lengths and cut tip and wipe macros, etc. will be necessary.
-If your printer has only one filament-sensor at the toolhead, use Kobra-3 config files as reference/starting point.
-In case your printer has two sensors (one at toolhead, one before that/outside the print chamber), use the KS1 config.
 
 ## 📋 Table of Contents
 
@@ -99,6 +92,8 @@ ace/
 config/
 ├── ace_K3.cfg            # Kobra 3 ACE configuration
 ├── ace_KS1.cfg           # Kobra S1 ACE configuration
+├── ace_merc.cfg          # ZeroG Mercury One.1 ACE configuration
+├── merc.cfg              # ZeroG Mercury One.1 printer config (CoreXY)
 ├── printer_K3.cfg        # Kobra 3 printer macros
 ├── printer_KS1.cfg       # Kobra S1 printer macros
 ├── printer_generic_macros.cfg # Shared pause/resume/velocity/purge macros
@@ -206,17 +201,6 @@ cp ~/printer_data/config/printer.cfg ~/printer_data/config/printer.cfg.backup
 # If you have custom modifications in your original printer.cfg,
 # merge them into the new configuration after installation.
 
-# For Kobra 3:
-cp ~/ACEPRO/config/printer_K3.cfg ~/printer_data/config/printer.cfg
-cp ~/ACEPRO/config/printer_generic_macros.cfg ~/printer_data/config/printer_generic_macros.cfg
-cp ~/ACEPRO/config/ace_K3.cfg ~/printer_data/config/ace_K3.cfg
-cp ~/ACEPRO/config/ace_macros_generic.cfg ~/printer_data/config/ace_macros_generic.cfg
-
-# For Kobra S1:
-cp ~/ACEPRO/config/printer_KS1.cfg ~/printer_data/config/printer.cfg
-cp ~/ACEPRO/config/printer_generic_macros.cfg ~/printer_data/config/printer_generic_macros.cfg
-cp ~/ACEPRO/config/ace_KS1.cfg ~/printer_data/config/ace_KS1.cfg
-cp ~/ACEPRO/config/ace_macros_generic.cfg ~/printer_data/config/ace_macros_generic.cfg
 ```
 
 
@@ -305,7 +289,9 @@ Configuration files are located in the `config/` folder. Choose the appropriate 
 config/
 ├── ace_K3.cfg                  # Kobra 3 ACE configuration
 ├── ace_KS1.cfg                 # Kobra S1 ACE configuration
+├── ace_merc.cfg                # ZeroG Mercury One.1 ACE configuration
 ├── ace_macros_generic.cfg      # Shared ACE macros for all printers
+├── merc.cfg                    # ZeroG Mercury One.1 printer config (CoreXY)
 ├── printer_generic_macros.cfg  # Shared printer macros (pause/resume/velocity/purge)
 ├── printer_K3.cfg              # Kobra 3 printer macros & settings
 └── printer_KS1.cfg             # Kobra S1 printer macros & settings
@@ -313,38 +299,25 @@ config/
 
 ### Include Hierarchy
 
-The configuration uses a modular include structure. The `printer_KS1.cfg` or `printer_K3.cfg` files **are your main printer configuration** - simply copy the appropriate file to `printer.cfg`:
+The configuration uses a modular include structure. The `merc.cfg` files **is your main printer configuration** — copy the appropriate file to `printer.cfg`:
 
-**For Anycubic Kobra S1:**
+**For ZeroG Mercury One.1 (CoreXY, Ender 5 / Ender 5 Pro / Ender 5 Plus):**
 ```
-printer.cfg (copy from printer_KS1.cfg)
+printer.cfg (copy from merc.cfg)
   ├─ [include printer_generic_macros.cfg]
-  │   └─ PAUSE/RESUME, velocity stack, purge helpers, wipe/throw moves
-  └─ [include ace_KS1.cfg]
+  ├─ filament runout sensor(s)
+  └─ [include ace_merc.cfg]
       ├─ [include ace_macros_generic.cfg]
-      │   └─ ACE helper macros (toolchange hooks, safety wrappers)
       ├─ [save_variables]
       └─ [ace] section with ACE configuration parameters
 ```
-
-**For Anycubic Kobra 3:**
-```
-printer.cfg (copy from printer_K3.cfg)
-  ├─ [include printer_generic_macros.cfg]
-  │   └─ PAUSE/RESUME, velocity stack, purge helpers, wipe/throw moves
-  └─ [include ace_K3.cfg]
-      ├─ [include ace_macros_generic.cfg]
-      │   └─ ACE helper macros (toolchange hooks, safety wrappers)
-      ├─ [save_variables]
-      └─ [ace] section with ACE configuration parameters
-```
+Note: ZeroG does not provide an official Klipper config. Pin assignments and serial paths in `merc.cfg` are templates — set them for your mainboard and toolhead (e.g. EVA 2.4).
 
 #### Printer Configuration Files
 
 | File | Purpose | Size | Printer |
 |------|---------|------|---------|
-| `printer_K3.cfg` | Kobra 3 printer macros & settings | - | Anycubic Kobra 3 |
-| `printer_KS1.cfg` | Kobra S1 printer macros & settings | - | Anycubic Kobra S1 |
+| `merc.cfg` | Mercury One.1 printer config (CoreXY, template pins) | - | ZeroG Mercury One.1 |
 | `printer_generic_macros.cfg` | Shared printer macros (pause/resume, velocity stack, purge helpers) | - | All printers |
 
 ### Configuration Setup by Printer Model
@@ -383,6 +356,17 @@ If you build your own `printer.cfg`, include the shared files in this order:
 [include ace_KS1.cfg]
 # ace_KS1.cfg includes ace_macros_generic.cfg for you
 ```
+
+#### For ZeroG Mercury One.1
+
+```bash
+cp ~/ACEPRO/config/merc.cfg ~/printer_data/config/printer.cfg
+cp ~/ACEPRO/config/printer_generic_macros.cfg ~/printer_data/config/printer_generic_macros.cfg
+cp ~/ACEPRO/config/ace_merc.cfg ~/printer_data/config/ace_merc.cfg
+ln -sf ~/ACEPRO/config/ace_macros_generic.cfg ~/printer_data/config/ace_macros_generic.cfg
+```
+
+Then edit `printer.cfg` (or `merc.cfg` before copying) and set `[mcu]` / `[mcu nozzle_mcu]` serial paths and pin assignments for your mainboard and toolhead. Build size (mercury_235 vs mercury_370) is documented in the file; adjust park positions and mesh limits as needed.
 
 ### Multi-Unit Configuration
 
