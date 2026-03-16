@@ -63,6 +63,7 @@ The browser-based dashboard (adapted from ValgACE) gives you a full ACE view wit
 - Dryer controls and per-slot actions (load/unload/assist), with RFID badges when tag data drives the slot metadata.
 - Multi-instance support on one page, mirroring the KlipperScreen panel layout.
 - Served by Moonraker at `http://<moonraker-host>:7125/ace.html` (or `https://...` if using TLS) after symlinking the assets in `ace_status_integration/web` as described in `ace_status_integration/README.md`.
+- A **compact ACE panel** for the Mainsail main dashboard (AFC-style) is available in `ace_status_integration_mainsail_panel/` — duplicate integration that you can symlink into Mainsail and add as a dashboard panel or iframe. See that folder’s README for setup.
 
 ![ACE Dashboard](img/ace-dashboard.png)
 

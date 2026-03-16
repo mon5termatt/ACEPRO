@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACE Panel</title>
+    <link rel="stylesheet" href="ace-panel.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="ace-panel-config.js"></script>
+</head>
+<body>
+    <div id="app" class="ace-panel">
+        <header class="panel-header">
+            <h2 class="panel-title">ACE Pro</h2>
+            <div class="panel-header-right">
+                <select v-if="instanceOptions.length > 0" v-model.number="selectedInstance" @change="onInstanceChange" class="instance-select">
+                    <option v-for="opt in instanceOptions" :key="opt.index" :value="opt.index">ACE {{ opt.index }}</option>
+                </select>
+                <span class="connection-badge" :class="connectionBadgeClass()">
+                    <span class="dot"></span>{{ getConnectionStateText(connectionBadgeClass()) }}
+                </span>
+                <a href="ace.html" target="_blank" class="link-full">Full dashboard</a>
+            </div>
+        </header>
+
+        <div class="panel-body">
+            <div class="row status-row">
+                <div class="status-item">
+                    <span class="label">Device:</span>
+                    <span class="value">{{ deviceStatus.model || '—' }} · {{ getStatusText(deviceStatus.status) }}</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Temp:</span>
+                    <span class="value">{{ deviceStatus.temp || 0 }}°C</span>
+                </div>
+                <div class="status-item dryer">
+                    <span class="label">Dryer:</span>
+                    <span class="value">{{ getDryerStatusText(dryerStatus.status) }}</span>
+                    <span v-if="dryerStatus.status === 'drying'" class="dryer-remain">{{ formatRemainingTime(dryerStatus.remain_time) }}</span>
+                    <button v-if="dryerStatus.status === 'drying'" @click="stopDrying" class="btn btn-xs btn-danger">Stop</button>
+                </div>
+            </div>
+
+            <div class="row current-tool-row">
+                <span class="label">Loaded:</span>
+                <span class="value">{{ currentTool >= 0 ? 'T' + currentTool : 'None' }}</span>
+            </div>
+
+            <div class="slots-strip">
+                <div
+                    v-for="slot in slots"
+                    :key="slot.index"
+                    class="slot-mini"
+                    :class="{ ready: slot.status === 'ready', empty: slot.status === 'empty', active: isCurrentToolSlot(slot, selectedInstance) }"
+                >
+                    <div class="slot-color" :style="{ background: getColorHex(slot.color) }"></div>
+                    <span class="slot-tool">T{{ slot.tool !== null && slot.tool !== undefined ? slot.tool : slot.index }}</span>
+                    <span class="slot-status">{{ getSlotStatusText(slot.status) }}</span>
+                    <button
+                        @click="changeToolForInstance(slot.tool !== null && slot.tool !== undefined ? slot.tool : slot.index, selectedInstance)"
+                        :disabled="slot.status !== 'ready' || isCurrentToolSlot(slot, selectedInstance)"
+                        class="btn btn-xs btn-primary"
+                    >Load</button>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button @click="saveInventoryAll" class="btn btn-sm btn-secondary">Save inventory</button>
+                <button @click="stopAssist" class="btn btn-sm btn-secondary">Stop assist</button>
+                <button @click="refreshStatus" class="btn btn-sm btn-secondary">Refresh</button>
+                <a href="ace.html" target="_blank" class="btn btn-sm btn-outline">Open full dashboard</a>
+            </div>
+        </div>
+
+        <div v-if="notification.show" class="toast" :class="notification.type">{{ notification.message }}</div>
+    </div>
+    <script src="ace-panel.js"></script>
+</body>
+</html>
